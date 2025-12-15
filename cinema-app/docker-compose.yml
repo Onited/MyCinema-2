@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # MongoDB for Movies and Sessions
+  mongodb:
+    image: mongo:7
+    container_name: cinema-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - cinema-network
+
+  # PostgreSQL for Users
+  postgres:
+    image: postgres:16
+    container_name: cinema-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cinema-network
+
+  # Movies Service
+  movies-service:
+    build: ./movies-service
+    container_name: movies-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/movies_db
+    depends_on:
+      - mongodb
+    networks:
+      - cinema-network
+
+  # Users Service
+  users-service:
+    build: ./users-service
+    container_name: users-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/users_db
+      - JWT_SECRET_KEY=your-super-secret-jwt-key
+    depends_on:
+      - postgres
+    networks:
+      - cinema-network
+
+  # Sessions Service
+  sessions-service:
+    build: ./sessions-service
+    container_name: sessions-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongodb:27017/sessions_db
+      - MOVIES_SERVICE_URL=http://movies-service:3001
+      - USERS_SERVICE_URL=http://users-service:3002
+    depends_on:
+      - mongodb
+    networks:
+      - cinema-network
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MOVIES_SERVICE_URL=http://movies-service:3001
+      - USERS_SERVICE_URL=http://users-service:3002
+      - SESSIONS_SERVICE_URL=http://sessions-service:3003
+    depends_on:
+      - movies-service
+      - users-service
+      - sessions-service
+    networks:
+      - cinema-network
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: cinema-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api-gateway
+    networks:
+      - cinema-network
+
+volumes:
+  mongodb_data:
+  postgres_data:
+
+networks:
+  cinema-network:
+    driver: bridge
