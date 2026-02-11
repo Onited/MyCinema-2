@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # MongoDB for Movies and Sessions
+  # MongoDB for Sessions
   mongodb:
     image: mongo:7
     container_name: cinema-mongodb
@@ -32,12 +32,7 @@ services:
     build: ./movies-service
     container_name: movies-service
     ports:
-      - "3001:3001"
-    environment:
-      - PORT=3001
-      - MONGODB_URI=mongodb://mongodb:27017/movies_db
-    depends_on:
-      - mongodb
+      - "8090:8090"
     networks:
       - cinema-network
 
