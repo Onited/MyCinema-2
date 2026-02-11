@@ -93,11 +93,11 @@ app.use('/api/movies', createProxy(MOVIES_SERVICE_URL, {
 
 // Users Service routes
 app.use('/api/users', createProxy(USERS_SERVICE_URL, {
-    '^/api/users': '/api/users'
+    '^/api/users': '/api/v1/users'
 }));
 
 app.use('/api/auth', createProxy(USERS_SERVICE_URL, {
-    '^/api/auth': '/api/auth'
+    '^/api/auth': '/api/v1/users'
 }));
 
 // Sessions Service routes
