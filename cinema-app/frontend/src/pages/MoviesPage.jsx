@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 function MoviesPage() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [filters, setFilters] = useState({
     genre: '',
     year: ''
@@ -18,6 +19,7 @@ function MoviesPage() {
   const loadMovies = async () => {
     try {
       setLoading(true)
+      setError(null)
       const params = { active: true }
       if (filters.genre) params.genre = filters.genre
       if (filters.year) params.year = filters.year
@@ -26,7 +28,9 @@ function MoviesPage() {
       setMovies(response.data)
     } catch (error) {
       console.error('Error loading movies:', error)
-      toast.error('Erreur lors du chargement des films')
+      const message = error.response?.data?.error || 'Impossible de charger les films'
+      setError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -82,6 +86,13 @@ function MoviesPage() {
               </div>
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">⚠️</div>
+          <h3>{error}</h3>
+          <p>Veuillez réessayer ultérieurement</p>
+          <button onClick={loadMovies} className="btn btn-primary mt-2">Réessayer</button>
         </div>
       ) : movies.length > 0 ? (
         <div className="grid grid-4">

@@ -1,8 +1,9 @@
 const Session = require('../models/Session');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
+const { mapMovieFields } = require('../utils/movieMapper');
 
-const MOVIES_SERVICE_URL = process.env.MOVIES_SERVICE_URL || 'http://localhost:3001';
+const MOVIES_SERVICE_URL = process.env.MOVIES_SERVICE_URL || 'http://localhost:8090';
 
 // Get all sessions
 exports.getAllSessions = async (req, res) => {
@@ -68,8 +69,30 @@ exports.createSession = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
+        const { movieId } = req.body;
+
+        // Valider que le film existe dans movies-service et récupérer son nom
+        let movieName = req.body.movieName;
+        try {
+            const movieResponse = await axios.get(`${MOVIES_SERVICE_URL}/films/${movieId}`, { timeout: 5000 });
+            const movie = mapMovieFields(movieResponse.data);
+            if (movie) {
+                movieName = movie.name;
+            }
+        } catch (movieError) {
+            if (movieError.response?.status === 404) {
+                return res.status(404).json({ error: 'Film non trouvé' });
+            }
+            // movies-service injoignable
+            return res.status(503).json({
+                error: 'Impossible de charger les films',
+                details: 'Le service de films est temporairement indisponible'
+            });
+        }
+
         const sessionData = {
             ...req.body,
+            movieName,
             availableSeats: req.body.totalSeats,
             basePrice: req.body.basePrice || parseFloat(process.env.BASE_TICKET_PRICE) || 10.00
         };

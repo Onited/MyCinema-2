@@ -10,6 +10,7 @@ function SessionsPage() {
   
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
   const [seats, setSeats] = useState(1)
@@ -22,11 +23,19 @@ function SessionsPage() {
   const loadSessions = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await sessionsApi.getAll({ upcoming: true, active: true })
       setSessions(response.data)
     } catch (error) {
       console.error('Error loading sessions:', error)
-      toast.error('Erreur lors du chargement des séances')
+      const message = error.response?.data?.error || 'Erreur lors du chargement des séances'
+      if (message.includes('Impossible de charger les films') || error.response?.status === 503) {
+        setError('Impossible de charger les films')
+        toast.error('Impossible de charger les films')
+      } else {
+        setError(message)
+        toast.error(message)
+      }
     } finally {
       setLoading(false)
     }
@@ -107,6 +116,13 @@ function SessionsPage() {
           {[1, 2, 3].map(i => (
             <div key={i} className="skeleton" style={{ height: '200px' }}></div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">⚠️</div>
+          <h3>{error}</h3>
+          <p>Veuillez réessayer ultérieurement</p>
+          <button onClick={loadSessions} className="btn btn-primary mt-2">Réessayer</button>
         </div>
       ) : Object.keys(sessionsByDate).length > 0 ? (
         Object.entries(sessionsByDate).map(([date, dateSessions]) => (

@@ -9,6 +9,7 @@ function MyReservationsPage() {
   const { user } = useContext(AuthContext)
   const [reservations, setReservations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
@@ -18,10 +19,13 @@ function MyReservationsPage() {
   const loadReservations = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await reservationsApi.getByUser(user.id)
       setReservations(response.data)
     } catch (error) {
-      toast.error('Erreur lors du chargement')
+      const message = error.response?.data?.error || 'Erreur lors du chargement des réservations'
+      setError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -48,6 +52,13 @@ function MyReservationsPage() {
       {loading ? (
         <div className="flex flex-col gap-2">
           {[1, 2].map(i => <div key={i} className="skeleton" style={{ height: '100px' }}></div>)}
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">⚠️</div>
+          <h3>{error}</h3>
+          <p>Veuillez réessayer ultérieurement</p>
+          <button onClick={loadReservations} className="btn btn-primary mt-2">Réessayer</button>
         </div>
       ) : reservations.length > 0 ? (
         <div className="flex flex-col gap-2">

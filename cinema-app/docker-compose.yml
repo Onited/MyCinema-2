@@ -60,10 +60,11 @@ services:
     environment:
       - PORT=3003
       - MONGODB_URI=mongodb://mongodb:27017/sessions_db
-      - MOVIES_SERVICE_URL=http://movies-service:3001
+      - MOVIES_SERVICE_URL=http://movies-service:8090
       - USERS_SERVICE_URL=http://users-service:3002
     depends_on:
       - mongodb
+      - movies-service
     networks:
       - cinema-network
 
@@ -75,7 +76,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MOVIES_SERVICE_URL=http://movies-service:3001
+      - MOVIES_SERVICE_URL=http://movies-service:8090
       - USERS_SERVICE_URL=http://users-service:3002
       - SESSIONS_SERVICE_URL=http://sessions-service:3003
     depends_on:

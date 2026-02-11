@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const sessionRoutes = require('./routes/sessionRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
+const movieRoutes = require('./routes/movieRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/reservations', reservationRoutes);
+app.use('/api/movies', movieRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

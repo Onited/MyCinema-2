@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Service URLs
-const MOVIES_SERVICE_URL = process.env.MOVIES_SERVICE_URL || 'http://localhost:3001';
+const MOVIES_SERVICE_URL = process.env.MOVIES_SERVICE_URL || 'http://localhost:8090';
 const USERS_SERVICE_URL = process.env.USERS_SERVICE_URL || 'http://localhost:3002';
 const SESSIONS_SERVICE_URL = process.env.SESSIONS_SERVICE_URL || 'http://localhost:3003';
 
@@ -88,7 +88,7 @@ const createProxy = (target, pathRewrite) => {
 
 // Movies Service routes
 app.use('/api/movies', createProxy(MOVIES_SERVICE_URL, {
-    '^/api/movies': '/api/movies'
+    '^/api/movies': '/films'
 }));
 
 // Users Service routes
