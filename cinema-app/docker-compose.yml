@@ -1,5 +1,5 @@
 # =========================================================================
-# Docker Compose – MyCinema (all services)
+# Docker Compose – MyCinema (3 microservices)
 # =========================================================================
 # Usage:  docker compose up --build
 # Stop:   docker compose down
@@ -12,19 +12,7 @@ services:
   #  DATABASES
   # -----------------------------------------------------------------------
 
-  # MongoDB — used by sessions-service
-  mongodb:
-    image: mongo:7
-    container_name: cinema-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - cinema-network
-
-  # PostgreSQL — used by user-service
+  # PostgreSQL — used by user-service (FastAPI)
   postgres:
     image: postgres:15-alpine
     container_name: cinema-postgres
@@ -45,11 +33,23 @@ services:
     networks:
       - cinema-network
 
+  # MongoDB — used by sessions-service (Express)
+  mongodb:
+    image: mongo:7
+    container_name: cinema-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - cinema-network
+
   # -----------------------------------------------------------------------
   #  MICRO-SERVICES
   # -----------------------------------------------------------------------
 
-  # Movies Service  (Java / Spring Boot — port 8090)
+  # 1) Movies Service  (Java / Spring Boot — port 8090)
   movies-service:
     build: ./movies-service
     container_name: movies-service
@@ -59,7 +59,7 @@ services:
     networks:
       - cinema-network
 
-  # User Service  (Python / FastAPI — port 8000)
+  # 2) User Service  (Python / FastAPI — port 8000)
   user-service:
     build: ./user-service
     container_name: user-service
@@ -79,7 +79,7 @@ services:
     networks:
       - cinema-network
 
-  # Sessions Service  (Node.js / Express — port 3003)
+  # 3) Sessions Service  (Node.js / Express — port 3003)
   sessions-service:
     build: ./sessions-service
     container_name: sessions-service
@@ -97,45 +97,10 @@ services:
     networks:
       - cinema-network
 
-  # -----------------------------------------------------------------------
-  #  API GATEWAY + FRONTEND
-  # -----------------------------------------------------------------------
-
-  # API Gateway  (Node.js / Express — port 3000)
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      PORT: 3000
-      MOVIES_SERVICE_URL: http://movies-service:8090
-      USERS_SERVICE_URL: http://user-service:8000
-      SESSIONS_SERVICE_URL: http://sessions-service:3003
-    depends_on:
-      - movies-service
-      - user-service
-      - sessions-service
-    networks:
-      - cinema-network
-
-  # Frontend  (Vite / React — port 5173)
-  frontend:
-    build: ./frontend
-    container_name: cinema-frontend
-    restart: unless-stopped
-    ports:
-      - "5173:5173"
-    depends_on:
-      - api-gateway
-    networks:
-      - cinema-network
-
 # =========================================================================
 volumes:
-  mongodb_data:
   postgres_data:
+  mongodb_data:
 
 
 networks:
