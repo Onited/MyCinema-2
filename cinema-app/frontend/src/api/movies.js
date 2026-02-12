@@ -35,12 +35,18 @@ function mapMovie(raw) {
         posterUrl = raw.posterUrl;
     }
 
+    const durationMinutes = raw.duration && !isNaN(raw.duration)
+        ? Math.round(raw.duration / 60_000_000_000)
+        : null;
+
     return {
         id: raw.id,
         name: raw.nom || raw.name,
-        genres: raw.genre ? raw.genre.split(',').map(g => g.trim()) : [],
+        genres: raw.genre
+            ? raw.genre.split(',').map(g => g.trim()).filter(g => g && g !== 'NaN' && !g.match(/^\d+$/))
+            : [],
         duration: raw.duration,
-        durationMinutes: raw.duration ? Math.round(raw.duration / 60_000_000_000) : null,
+        durationMinutes: durationMinutes && !isNaN(durationMinutes) ? durationMinutes : null,
         description: raw.description,
         posterUrl,
     };
