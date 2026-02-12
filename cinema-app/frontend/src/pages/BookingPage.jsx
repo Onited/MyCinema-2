@@ -95,6 +95,8 @@ export default function BookingPage() {
   };
 
   if (success) {
+    const reservation = success.reservation;
+    const pricing = success.pricingDetails;
     return (
       <div className="booking-page">
         <div className="booking-success">
@@ -103,7 +105,7 @@ export default function BookingPage() {
           <div className="booking-ticket">
             <div className="ticket-row">
               <span>Code</span>
-              <strong>{success.reservationCode}</strong>
+              <strong>{reservation.reservationCode}</strong>
             </div>
             <div className="ticket-row">
               <span>Film</span>
@@ -111,11 +113,11 @@ export default function BookingPage() {
             </div>
             <div className="ticket-row">
               <span>Places</span>
-              <strong>{success.numberOfSeats}</strong>
+              <strong>{pricing.numberOfSeats}</strong>
             </div>
             <div className="ticket-row">
               <span>Total</span>
-              <strong>{success.totalPrice?.toFixed(2)} €</strong>
+              <strong>{pricing.totalPrice?.toFixed(2)} €</strong>
             </div>
           </div>
           <div className="booking-actions">
