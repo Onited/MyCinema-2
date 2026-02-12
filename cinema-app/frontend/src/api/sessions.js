@@ -23,6 +23,17 @@ export async function getSessionById(id) {
     return res.json();
 }
 
+export async function createSession(data) {
+    const res = await fetch(SESSIONS_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Erreur lors de la création');
+    return result;
+}
+
 /* ─── Reservations ─── */
 
 export async function createReservation(data, token) {

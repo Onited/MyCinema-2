@@ -31,6 +31,9 @@ export default function Navbar() {
             <>
               <Link to="/reservations" className="nav-link">Mes Réservations</Link>
               <Link to="/profile" className="nav-link">Profil</Link>
+              {user.user_type === 'admin' && (
+                <Link to="/admin/sessions" className="nav-link nav-link-admin">⚙️ Admin</Link>
+              )}
             </>
           )}
         </div>

@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage';
 import BookingPage from './pages/BookingPage';
 import ReservationsPage from './pages/ReservationsPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminSessionsPage from './pages/AdminSessionsPage';
 
 export default function App() {
   return (
@@ -45,6 +46,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/sessions"
+                element={
+                  <ProtectedRoute>
+                    <AdminSessionsPage />
                   </ProtectedRoute>
                 }
               />

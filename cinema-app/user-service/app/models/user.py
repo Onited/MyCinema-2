@@ -17,6 +17,7 @@ class UserType(str, enum.Enum):
     ETUDIANT = "etudiant"
     MINEUR = "mineur"      # -16 ans
     CHOMEUR = "chomeur"
+    ADMIN = "admin"
 
 
 class User(Base):
