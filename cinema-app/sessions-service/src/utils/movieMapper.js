@@ -1,16 +1,16 @@
 /**
- * Mappe les champs d'un film provenant du movies-service (Spring Boot)
- * vers le format attendu par le frontend.
+ * Maps fields from a movie from movies-service (Spring Boot)
+ * to the format expected by the frontend.
  *
  * Spring Boot Film entity: { id, nom, genre, duration, description, imageData }
- * Frontend attend:         { id, name, genre, duration, description, posterUrl }
+ * Frontend expects:        { id, name, genre, duration, description, posterUrl }
  */
 function mapMovieFields(film) {
     if (!film) return null;
 
     return {
         id: film.id,
-        name: film.nom || film.name || 'Sans titre',
+        name: film.nom || film.name || 'Untitled',
         genre: film.genre || '',
         duration: film.duration || null,
         description: film.description || '',
@@ -19,7 +19,7 @@ function mapMovieFields(film) {
 }
 
 /**
- * Mappe un tableau de films
+ * Maps an array of movies
  */
 function mapMovieList(films) {
     if (!Array.isArray(films)) return [];

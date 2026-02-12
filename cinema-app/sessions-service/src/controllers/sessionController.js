@@ -4,6 +4,14 @@ const axios = require('axios');
 const { mapMovieFields } = require('../utils/movieMapper');
 
 const MOVIES_SERVICE_URL = process.env.MOVIES_SERVICE_URL || 'http://localhost:8090';
+const AXIOS_TIMEOUT = 5000;
+
+const ERROR_MESSAGES = {
+    SESSION_NOT_FOUND: 'Session not found',
+    MOVIE_NOT_FOUND: 'Movie not found',
+    MOVIES_LOAD_ERROR: 'Unable to load movies',
+    SERVICE_UNAVAILABLE: 'Movie service is temporarily unavailable'
+};
 
 // Get all sessions
 exports.getAllSessions = async (req, res) => {
@@ -53,7 +61,7 @@ exports.getSessionById = async (req, res) => {
     try {
         const session = await Session.findById(req.params.id);
         if (!session) {
-            return res.status(404).json({ error: 'Session not found' });
+            return res.status(404).json({ error: ERROR_MESSAGES.SESSION_NOT_FOUND });
         }
         res.json(session);
     } catch (error) {
@@ -71,22 +79,21 @@ exports.createSession = async (req, res) => {
 
         const { movieId } = req.body;
 
-        // Valider que le film existe dans movies-service et récupérer son nom
+        // Validate that the movie exists in movies-service and get its name
         let movieName = req.body.movieName;
         try {
-            const movieResponse = await axios.get(`${MOVIES_SERVICE_URL}/films/${movieId}`, { timeout: 5000 });
+            const movieResponse = await axios.get(`${MOVIES_SERVICE_URL}/films/${movieId}`, { timeout: AXIOS_TIMEOUT });
             const movie = mapMovieFields(movieResponse.data);
             if (movie) {
                 movieName = movie.name;
             }
         } catch (movieError) {
             if (movieError.response?.status === 404) {
-                return res.status(404).json({ error: 'Film non trouvé' });
+                return res.status(404).json({ error: ERROR_MESSAGES.MOVIE_NOT_FOUND });
             }
-            // movies-service injoignable
             return res.status(503).json({
-                error: 'Impossible de charger les films',
-                details: 'Le service de films est temporairement indisponible'
+                error: ERROR_MESSAGES.MOVIES_LOAD_ERROR,
+                details: ERROR_MESSAGES.SERVICE_UNAVAILABLE
             });
         }
 
@@ -115,7 +122,7 @@ exports.updateSession = async (req, res) => {
         );
 
         if (!session) {
-            return res.status(404).json({ error: 'Session not found' });
+            return res.status(404).json({ error: ERROR_MESSAGES.SESSION_NOT_FOUND });
         }
         res.json(session);
     } catch (error) {
@@ -128,7 +135,7 @@ exports.deleteSession = async (req, res) => {
     try {
         const session = await Session.findByIdAndDelete(req.params.id);
         if (!session) {
-            return res.status(404).json({ error: 'Session not found' });
+            return res.status(404).json({ error: ERROR_MESSAGES.SESSION_NOT_FOUND });
         }
         res.json({ message: 'Session deleted successfully' });
     } catch (error) {
