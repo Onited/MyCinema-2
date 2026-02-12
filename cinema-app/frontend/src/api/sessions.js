@@ -64,7 +64,7 @@ export async function getReservationByCode(code) {
 
 export async function cancelReservation(id) {
     const res = await fetch(`${RESERVATIONS_BASE}/${id}/cancel`, {
-        method: 'PATCH',
+        method: 'PUT',
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || 'Erreur lors de l\'annulation');
