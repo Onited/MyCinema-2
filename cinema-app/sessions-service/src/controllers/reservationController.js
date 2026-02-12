@@ -1,9 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Session = require('../models/Session');
 const { validationResult } = require('express-validator');
-const axios = require('axios');
-
-const USERS_SERVICE_URL = process.env.USERS_SERVICE_URL || 'http://localhost:3002';
 
 // Pricing multipliers by user type
 const PRICING_MULTIPLIERS = {
