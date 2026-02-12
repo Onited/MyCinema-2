@@ -14,7 +14,7 @@ services:
 
   # PostgreSQL — used by user-service (FastAPI)
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: cinema-postgres
     restart: unless-stopped
     environment:
@@ -67,7 +67,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://cinema:cinema_secret_2024@postgres:5432/cinema_users
+      DATABASE_URL: postgresql+asyncpg://c/cinema_users
       SECRET_KEY: Xk9v2Lp4Qm7Rn1Wz6Yj3Bf8Td0Gs5Hc
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
