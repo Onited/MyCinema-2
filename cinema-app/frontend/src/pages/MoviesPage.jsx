@@ -17,13 +17,13 @@ export default function MoviesPage() {
   }, []);
 
   const genres = useMemo(() => {
-    const set = new Set(movies.map((m) => m.genre).filter(Boolean));
+    const set = new Set(movies.flatMap((m) => m.genres).filter(Boolean));
     return ['Tous', ...Array.from(set).sort()];
   }, [movies]);
 
   const filtered = useMemo(() => {
     return movies.filter((m) => {
-      const matchGenre = activeGenre === 'Tous' || m.genre === activeGenre;
+      const matchGenre = activeGenre === 'Tous' || m.genres.includes(activeGenre);
       const matchSearch =
         !search ||
         m.name?.toLowerCase().includes(search.toLowerCase()) ||

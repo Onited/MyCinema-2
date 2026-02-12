@@ -57,7 +57,9 @@ export default function MovieDetailPage() {
           <Link to="/" className="back-link">← Retour</Link>
           <h1>{movie.name}</h1>
           <div className="movie-detail-meta">
-            {movie.genre && <span className="movie-genre-tag">{movie.genre}</span>}
+            {movie.genres?.map((g) => (
+              <span key={g} className="movie-genre-tag">{g}</span>
+            ))}
             {movie.durationMinutes && (
               <span className="movie-duration">⏱ {movie.durationMinutes} min</span>
             )}

@@ -20,7 +20,9 @@ export default function MovieCard({ movie }) {
       <div className="movie-card-info">
         <h3 className="movie-card-title">{movie.name}</h3>
         <div className="movie-card-meta">
-          {movie.genre && <span className="movie-genre-tag">{movie.genre}</span>}
+          {movie.genres?.map((g) => (
+            <span key={g} className="movie-genre-tag">{g}</span>
+          ))}
           {movie.durationMinutes && (
             <span className="movie-duration">{movie.durationMinutes} min</span>
           )}

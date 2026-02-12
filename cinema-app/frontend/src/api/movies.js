@@ -38,7 +38,7 @@ function mapMovie(raw) {
     return {
         id: raw.id,
         name: raw.nom || raw.name,
-        genre: raw.genre,
+        genres: raw.genre ? raw.genre.split(',').map(g => g.trim()) : [],
         duration: raw.duration,
         durationMinutes: raw.duration ? Math.round(raw.duration / 60_000_000_000) : null,
         description: raw.description,
