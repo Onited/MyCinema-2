@@ -1,10 +1,43 @@
-version: '3.8'
+# =========================================================================
+# Docker Compose – MyCinema (3 microservices)
+# =========================================================================
+# Usage:  docker compose up --build
+# Stop:   docker compose down
+# Reset:  docker compose down -v   (removes volumes / data)
+# =========================================================================
 
 services:
-  # MongoDB for Sessions
+
+  # -----------------------------------------------------------------------
+  #  DATABASES
+  # -----------------------------------------------------------------------
+
+  # PostgreSQL — used by user-service (FastAPI)
+  postgres:
+    image: postgres:15-alpine
+    container_name: cinema-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cinema
+      POSTGRES_PASSWORD: cinema_secret_2024
+      POSTGRES_DB: cinema_users
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cinema -d cinema_users" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cinema-network
+
+  # MongoDB — used by sessions-service (Express)
   mongodb:
     image: mongo:7
     container_name: cinema-mongodb
+    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
@@ -12,94 +45,63 @@ services:
     networks:
       - cinema-network
 
-  # PostgreSQL for Users
-  postgres:
-    image: postgres:16
-    container_name: cinema-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: users_db
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cinema-network
+  # -----------------------------------------------------------------------
+  #  MICRO-SERVICES
+  # -----------------------------------------------------------------------
 
-  # Movies Service
+  # 1) Movies Service  (Java / Spring Boot — port 8090)
   movies-service:
     build: ./movies-service
     container_name: movies-service
+    restart: unless-stopped
     ports:
       - "8090:8090"
     networks:
       - cinema-network
 
-  # Users Service
-  users-service:
-    build: ./users-service
-    container_name: users-service
+  # 2) User Service  (Python / FastAPI — port 8000)
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    restart: unless-stopped
     ports:
-      - "3002:3002"
+      - "8000:8000"
     environment:
-      - PORT=3002
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/users_db
-      - JWT_SECRET_KEY=your-super-secret-jwt-key
+      DATABASE_URL: postgresql+asyncpg://cinema:cinema_secret_2024@postgres:5432/cinema_users
+      SECRET_KEY: Xk9v2Lp4Qm7Rn1Wz6Yj3Bf8Td0Gs5Hc
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      APP_NAME: "MyCinema – User Service"
+      DEBUG: "false"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - cinema-network
 
-  # Sessions Service
+  # 3) Sessions Service  (Node.js / Express — port 3003)
   sessions-service:
     build: ./sessions-service
     container_name: sessions-service
+    restart: unless-stopped
     ports:
       - "3003:3003"
     environment:
-      - PORT=3003
-      - MONGODB_URI=mongodb://mongodb:27017/sessions_db
-      - MOVIES_SERVICE_URL=http://movies-service:8090
-      - USERS_SERVICE_URL=http://users-service:3002
+      PORT: 3003
+      MONGODB_URI: mongodb://mongodb:27017/sessions_db
+      MOVIES_SERVICE_URL: http://movies-service:8090
+      USERS_SERVICE_URL: http://user-service:8000
     depends_on:
       - mongodb
       - movies-service
     networks:
       - cinema-network
 
-  # API Gateway
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - MOVIES_SERVICE_URL=http://movies-service:8090
-      - USERS_SERVICE_URL=http://users-service:3002
-      - SESSIONS_SERVICE_URL=http://sessions-service:3003
-    depends_on:
-      - movies-service
-      - users-service
-      - sessions-service
-    networks:
-      - cinema-network
-
-  # Frontend
-  frontend:
-    build: ./frontend
-    container_name: cinema-frontend
-    ports:
-      - "5173:5173"
-    depends_on:
-      - api-gateway
-    networks:
-      - cinema-network
-
+# =========================================================================
 volumes:
-  mongodb_data:
   postgres_data:
+  mongodb_data:
+
 
 networks:
   cinema-network:

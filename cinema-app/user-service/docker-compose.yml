@@ -1,0 +1,40 @@
+# =========================================================================
+# Docker Compose – MyCinema User Microservice
+# =========================================================================
+# Usage:  docker compose up --build
+# Docs:   http://localhost:8000/docs
+# =========================================================================
+
+services:
+  # --- PostgreSQL --------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cinema}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cinema_secret_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-cinema_users}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cinema -d cinema_users" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- FastAPI User Service ----------------------------------------------
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
