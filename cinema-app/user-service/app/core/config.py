@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://cinema:cinema_secret_2024@db:5432/cinema_users"
+    DATABASE_URL: str = "postgresql+asyncpg://cinema:cinema_secret_2024@postgres:5432/cinema_users"
 
     # JWT
     SECRET_KEY: str = "CHANGE_ME_IN_PRODUCTION"
